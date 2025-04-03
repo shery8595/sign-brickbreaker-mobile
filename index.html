@@ -16,7 +16,6 @@
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             padding: 0;
-            touch-action: none;
         }
         .game-container {
             position: relative;
@@ -84,6 +83,34 @@
         #restartButton:hover {
             background: linear-gradient(45deg, #FF6347, #FFA500);
         }
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        .arrow-button {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #FF4500, #FF8C00);
+            border: 2px solid #FFD700;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .arrow-button:active {
+            background: linear-gradient(45deg, #FF6347, #FFA500);
+        }
     </style>
 </head>
 <body>
@@ -93,6 +120,10 @@
         <div id="level">Level: 1</div>
         <button id="restartButton">Restart</button>
         <canvas id="gameCanvas" width="360" height="640"></canvas>
+        <div class="controls">
+            <button id="leftArrow" class="arrow-button">←</button>
+            <button id="rightArrow" class="arrow-button">→</button>
+        </div>
     </div>
 
     <script>
@@ -100,6 +131,8 @@
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
         const levelElement = document.getElementById('level');
+        const leftArrow = document.getElementById('leftArrow');
+        const rightArrow = document.getElementById('rightArrow');
 
         // Adjusted game constants for mobile
         const PADDLE_WIDTH = 80;
@@ -129,7 +162,8 @@
         let headImages = [];
         let gameOver = false;
         let restartButton = document.getElementById('restartButton');
-        let touchX = null;
+        let leftPressed = false;
+        let rightPressed = false;
 
         // Brick types with border and glow
         const BRICK_TYPES = {
@@ -226,22 +260,18 @@
                         brick.y = brickY;
                         const brickType = BRICK_TYPES[Object.keys(BRICK_TYPES)[brick.type - 1]];
                         
-                        // Draw glow effect
                         ctx.shadowColor = brickType.glow;
                         ctx.shadowBlur = 10;
                         ctx.shadowOffsetX = 0;
                         ctx.shadowOffsetY = 0;
                         
-                        // Draw brick fill
                         ctx.fillStyle = brickType.color;
                         ctx.fillRect(brickX, brickY, BRICK_WIDTH, BRICK_HEIGHT);
                         
-                        // Draw border
                         ctx.strokeStyle = brickType.border;
                         ctx.lineWidth = 2;
                         ctx.strokeRect(brickX, brickY, BRICK_WIDTH, BRICK_HEIGHT);
                         
-                        // Reset shadow for other elements
                         ctx.shadowBlur = 0;
                     }
                 }
@@ -302,9 +332,12 @@
             drawBall();
             collisionDetection();
 
-            // Touch-based paddle movement
-            if (touchX !== null) {
-                paddleX = Math.max(0, Math.min(canvas.width - PADDLE_WIDTH, touchX - PADDLE_WIDTH / 2));
+            // Paddle movement based on button presses
+            if (leftPressed && paddleX > 0) {
+                paddleX -= PADDLE_SPEED;
+            }
+            if (rightPressed && paddleX < canvas.width - PADDLE_WIDTH) {
+                paddleX += PADDLE_SPEED;
             }
 
             // Ball movement and collisions
@@ -330,21 +363,27 @@
             requestAnimationFrame(draw);
         }
 
-        // Touch handlers
-        canvas.addEventListener('touchstart', (e) => {
+        // Button event handlers
+        leftArrow.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            touchX = e.touches[0].clientX - canvas.offsetLeft;
+            leftPressed = true;
+        });
+        leftArrow.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            leftPressed = false;
+        });
+        rightArrow.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            rightPressed = true;
+        });
+        rightArrow.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            rightPressed = false;
         });
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            touchX = e.touches[0].clientX - canvas.offsetLeft;
-        });
-
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            touchX = null;
-        });
+        // Prevent default touch behavior on canvas
+        canvas.addEventListener('touchstart', (e) => e.preventDefault());
+        canvas.addEventListener('touchmove', (e) => e.preventDefault());
 
         // Restart handler
         restartButton.addEventListener('click', () => {
