@@ -328,7 +328,7 @@
             ballDY = -BALL_SPEED;
         }
 
-        // Game loop with new paddle collision logic
+        // Game loop with simplified paddle collision
         function draw() {
             if (gameOver) return;
 
@@ -355,21 +355,19 @@
             }
 
             // Paddle collision and game over check
-            const paddleTop = canvas.height - 30;
-            const paddleBottom = paddleTop + PADDLE_HEIGHT;
-            const ballTop = ballY + ballDY - BALL_RADIUS;
+            const paddleBottom = canvas.height - 30 + PADDLE_HEIGHT;
             const ballBottom = ballY + ballDY + BALL_RADIUS;
 
-            // Check if ball's top edge reaches or passes paddle's top edge
-            if (ballTop >= paddleTop && 
-                ballBottom <= paddleBottom && 
+            // Check if ball hits paddle
+            if (ballBottom > canvas.height - 30 && 
+                ballY + ballDY < paddleBottom && 
                 ballX > paddleX && 
                 ballX < paddleX + PADDLE_WIDTH) {
-                ballDY = -Math.abs(ballDY); // Bounce upward
+                ballDY = -Math.abs(ballDY);
                 const hitPosition = (ballX - paddleX) / PADDLE_WIDTH;
                 ballDX = (hitPosition - 0.5) * MAX_BALL_SPEED;
             }
-            // Check if ball's bottom edge passes below paddle's bottom edge
+            // Check if ball passes below paddle
             else if (ballBottom > paddleBottom) {
                 gameOver = true;
                 restartButton.style.display = 'block';
