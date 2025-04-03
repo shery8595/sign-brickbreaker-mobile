@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #FFA |500, #FF8C00);
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             padding: 0;
@@ -33,7 +33,7 @@
         }
         #sign-title {
             position: absolute;
-            top: 5px;
+            top: -5px; /* Moved up from 5px to -5px to avoid overlap */
             left: 50%;
             transform: translateX(-50%);
             font-size: 36px;
@@ -41,6 +41,9 @@
             font-family: 'Bubblegum Sans', cursive;
             text-shadow: 2px 2px 0 #FF8C00;
             z-index: 2;
+            background: linear-gradient(135deg, #FFA500, #FF8C00); /* Added background to mask any lines */
+            padding: 0 10px; /* Added padding for better coverage */
+            border-radius: 5px; /* Slight rounding for aesthetics */
         }
         #score {
             position: absolute;
@@ -358,7 +361,7 @@
                 ballY + ballDY - BALL_RADIUS < paddleBottom) {
                 if (ballX > paddleX && ballX < paddleX + PADDLE_WIDTH) {
                     // Ball hits paddle
-                    ballDY = -Math.abs(ballDY); // Ensure bounce upward
+                    ballDY = -Math.abs(ballDY);
                     const hitPosition = (ballX - paddleX) / PADDLE_WIDTH;
                     ballDX = (hitPosition - 0.5) * MAX_BALL_SPEED;
                 } else if (ballY + ballDY + BALL_RADIUS > paddleBottom) {
