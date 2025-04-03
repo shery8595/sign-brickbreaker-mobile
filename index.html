@@ -33,7 +33,7 @@
         }
         #sign-title {
             position: absolute;
-            top: -5px; /* Moved up from 5px to -5px to avoid overlap */
+            top: -5px;
             left: 50%;
             transform: translateX(-50%);
             font-size: 36px;
@@ -41,9 +41,9 @@
             font-family: 'Bubblegum Sans', cursive;
             text-shadow: 2px 2px 0 #FF8C00;
             z-index: 2;
-            background: linear-gradient(135deg, #FFA500, #FF8C00); /* Added background to mask any lines */
-            padding: 0 10px; /* Added padding for better coverage */
-            border-radius: 5px; /* Slight rounding for aesthetics */
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
+            padding: 0 10px;
+            border-radius: 5px;
         }
         #score {
             position: absolute;
@@ -284,7 +284,7 @@
             }
         }
 
-        // Collision detection
+        // Collision detection for bricks
         function collisionDetection() {
             for (let c = 0; c < BRICK_COLUMNS; c++) {
                 for (let r = 0; r < BRICK_ROWS; r++) {
@@ -328,7 +328,7 @@
             ballDY = -BALL_SPEED;
         }
 
-        // Game loop with fixed collision detection
+        // Game loop with simplified paddle collision
         function draw() {
             if (gameOver) return;
 
@@ -354,21 +354,23 @@
                 ballDY = -ballDY;
             }
 
-            // Paddle collision detection
-            const paddleTop = canvas.height - 30;
-            const paddleBottom = paddleTop + PADDLE_HEIGHT;
-            if (ballY + ballDY + BALL_RADIUS > paddleTop && 
-                ballY + ballDY - BALL_RADIUS < paddleBottom) {
-                if (ballX > paddleX && ballX < paddleX + PADDLE_WIDTH) {
-                    // Ball hits paddle
-                    ballDY = -Math.abs(ballDY);
-                    const hitPosition = (ballX - paddleX) / PADDLE_WIDTH;
-                    ballDX = (hitPosition - 0.5) * MAX_BALL_SPEED;
-                } else if (ballY + ballDY + BALL_RADIUS > paddleBottom) {
-                    // Ball passes below paddle
-                    gameOver = true;
-                    restartButton.style.display = 'block';
-                }
+            // Paddle collision and game over check
+            const paddleBottom = canvas.height - 30 + PADDLE_HEIGHT;
+            const ballBottom = ballY + ballDY + BALL_RADIUS;
+
+            // Check if ball hits paddle
+            if (ballBottom > canvas.height - 30 && 
+                ballY + ballDY < paddleBottom && 
+                ballX > paddleX && 
+                ballX < paddleX + PADDLE_WIDTH) {
+                ballDY = -Math.abs(ballDY);
+                const hitPosition = (ballX - paddleX) / PADDLE_WIDTH;
+                ballDX = (hitPosition - 0.5) * MAX_BALL_SPEED;
+            }
+            // Check if ball passes below paddle
+            else if (ballBottom > paddleBottom) {
+                gameOver = true;
+                restartButton.style.display = 'block';
             }
 
             ballX += ballDX;
