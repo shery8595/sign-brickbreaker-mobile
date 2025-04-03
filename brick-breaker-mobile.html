@@ -142,6 +142,86 @@
         const POWERUP_DURATION = 10000; // 10 seconds
         const POWERUP_CHANCE = 0.2; // 20% chance
 
+        // Brick types with enhanced colors
+        const BRICK_TYPES = {
+            NORMAL: { hits: 1, color: "#FFD700", border: "#FF8C00", glow: "#FFA500" },
+            MEDIUM: { hits: 2, color: "#FF6347", border: "#FF4500", glow: "#FF0000" },
+            HARD: { hits: 3, color: "#8B0000", border: "#FF0000", glow: "#FF4500" }
+        };
+
+        // Level layouts
+        const LEVEL_LAYOUTS = [
+            // Level 1 - Normal bricks
+            [
+                [1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1]
+            ],
+            // Level 2 - Medium bricks
+            [
+                [2,2,2,2,2,2,2,2],
+                [2,2,2,2,2,2,2,2],
+                [2,2,2,2,2,2,2,2],
+                [2,2,2,2,2,2,2,2],
+                [2,2,2,2,2,2,2,2]
+            ],
+            // Level 3 - Hard bricks
+            [
+                [3,3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3,3]
+            ]
+        ];
+
+        // Powerup class
+        class Powerup {
+            constructor(type) {
+                this.type = type;
+                this.x = Math.random() * (canvas.width - 20) + 10;
+                this.y = 0;
+                this.radius = 10;
+                this.speed = 2;
+                this.collected = false;
+                
+                // Set colors based on type
+                switch(type) {
+                    case 'largePaddle':
+                        this.color = '#00FF00';
+                        this.border = '#00CC00';
+                        this.glow = '#00FF00';
+                        break;
+                    case 'fastBall':
+                        this.color = '#00FFFF';
+                        this.border = '#00CCCC';
+                        this.glow = '#00FFFF';
+                        break;
+                }
+            }
+
+            update() {
+                if (!this.collected) {
+                    this.y += this.speed;
+                }
+            }
+
+            isCollected(paddleX, paddleWidth) {
+                if (this.collected) return false;
+                
+                const paddleRight = paddleX + paddleWidth;
+                if (this.y + this.radius > canvas.height - PADDLE_HEIGHT &&
+                    this.x + this.radius > paddleX &&
+                    this.x - this.radius < paddleRight) {
+                    this.collected = true;
+                    return true;
+                }
+                return false;
+            }
+        }
+
         // Get canvas and context
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
