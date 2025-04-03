@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #FFA500, #FF8C00);
+            background: linear-gradient(135deg, #FFA |500, #FF8C00);
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             padding: 0;
@@ -96,7 +96,7 @@
         .arrow-button {
             width: 60px;
             height: 60px;
-            background: linear-gradient(45deg, rgba(255, 69, 0, 0.7), rgba(255, 140, 0, 0.7)); /* Added transparency */
+            background: linear-gradient(45deg, rgba(255, 69, 0, 0.7), rgba(255, 140, 0, 0.7));
             border: 2px solid #FFD700;
             border-radius: 50%;
             color: white;
@@ -109,7 +109,7 @@
             touch-action: manipulation;
         }
         .arrow-button:active {
-            background: linear-gradient(45deg, rgba(255, 99, 71, 0.7), rgba(255, 165, 0, 0.7)); /* Transparent active state */
+            background: linear-gradient(45deg, rgba(255, 99, 71, 0.7), rgba(255, 165, 0, 0.7));
         }
     </style>
 </head>
@@ -235,7 +235,7 @@
         function drawPaddle() {
             ctx.fillStyle = '#FF8C00';
             ctx.fillRect(paddleX, canvas.height - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
-            ctx.strokeStyle = '#FFFFFF'; // White outline
+            ctx.strokeStyle = '#FFFFFF';
             ctx.lineWidth = 2;
             ctx.strokeRect(paddleX, canvas.height - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
         }
@@ -325,7 +325,7 @@
             ballDY = -BALL_SPEED;
         }
 
-        // Game loop
+        // Game loop with fixed collision detection
         function draw() {
             if (gameOver) return;
 
@@ -349,12 +349,20 @@
             }
             if (ballY + ballDY < BALL_RADIUS) {
                 ballDY = -ballDY;
-            } else if (ballY + ballDY > canvas.height - 30 - BALL_RADIUS) {
+            }
+
+            // Paddle collision detection
+            const paddleTop = canvas.height - 30;
+            const paddleBottom = paddleTop + PADDLE_HEIGHT;
+            if (ballY + ballDY + BALL_RADIUS > paddleTop && 
+                ballY + ballDY - BALL_RADIUS < paddleBottom) {
                 if (ballX > paddleX && ballX < paddleX + PADDLE_WIDTH) {
-                    ballDY = -ballDY;
+                    // Ball hits paddle
+                    ballDY = -Math.abs(ballDY); // Ensure bounce upward
                     const hitPosition = (ballX - paddleX) / PADDLE_WIDTH;
                     ballDX = (hitPosition - 0.5) * MAX_BALL_SPEED;
-                } else {
+                } else if (ballY + ballDY + BALL_RADIUS > paddleBottom) {
+                    // Ball passes below paddle
                     gameOver = true;
                     restartButton.style.display = 'block';
                 }
