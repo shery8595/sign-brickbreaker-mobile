@@ -167,6 +167,10 @@
         let restartButton = document.getElementById('restartButton');
         let leftPressed = false;
         let rightPressed = false;
+        let brickSound = new Audio('brick_sound/break.mp3');
+        let bgMusic = new Audio('brick_sound/bg_sound.mp3');
+        bgMusic.loop = true;
+        bgMusic.volume = 0.5; // Set volume to 50%
 
         // Brick types with border and glow
         const BRICK_TYPES = {
@@ -421,6 +425,8 @@
         // Start game
         loadHeadImages();
         initBricks();
+        // Start background music
+        bgMusic.play().catch(e => console.log("Background music play failed:", e));
         draw();
     </script>
 </body>
