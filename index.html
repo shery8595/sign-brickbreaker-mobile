@@ -68,6 +68,31 @@
             border-radius: 5px;
             border: 2px solid #FF8C00;
         }
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 28px;
+            color: white;
+            background: linear-gradient(45deg, #FF4500, #FF8C00);
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            cursor: pointer;
+            z-index: 1000;
+            font-family: 'Bubblegum Sans', cursive;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #startButton:hover {
+            background: linear-gradient(45deg, #FF6347, #FFA500);
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        #startButton:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
         #restartButton {
             display: none;
             position: absolute;
@@ -122,6 +147,7 @@
         <div id="sign-title">SIGN</div>
         <div id="score">Score: 0</div>
         <div id="level">Level: 1</div>
+        <button id="startButton">Start Game</button>
         <button id="restartButton">Restart</button>
         <canvas id="gameCanvas" width="360" height="640"></canvas>
         <div class="controls">
@@ -166,6 +192,7 @@
         let headImages = [];
         let gameOver = false;
         let restartButton = document.getElementById('restartButton');
+        let startButton = document.getElementById('startButton');
         let leftPressed = false;
         let rightPressed = false;
         
@@ -449,6 +476,9 @@
         
         // Start background music with user interaction
         function startGame() {
+            // Hide start button
+            startButton.style.display = 'none';
+            
             // Try to play background music
             bgMusic.play().then(() => {
                 console.log("Background music started");
@@ -458,11 +488,8 @@
             draw();
         }
         
-        // Start game on first user interaction
-        document.addEventListener('click', function startGameOnClick() {
-            startGame();
-            document.removeEventListener('click', startGameOnClick);
-        }, { once: true });
+        // Start game when start button is clicked
+        startButton.addEventListener('click', startGame);
 
         // Set canvas size
         function resizeCanvas() {
