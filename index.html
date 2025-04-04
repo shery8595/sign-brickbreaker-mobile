@@ -321,6 +321,7 @@
                             score++;
                             scoreElement.textContent = `Score: ${score}`;
                             currentHeadIndex = (currentHeadIndex + 1) % headImages.length;
+                            playBrickSound();
                             if (isLevelComplete()) nextLevel();
                             return;
                         }
@@ -444,9 +445,23 @@
         // Start game
         loadHeadImages();
         initBricks();
-        // Start background music
-        bgMusic.play().catch(e => console.log("Background music play failed:", e));
-        draw();
+        
+        // Start background music with user interaction
+        function startGame() {
+            // Try to play background music
+            bgMusic.play().then(() => {
+                console.log("Background music started");
+            }).catch(e => {
+                console.error("Background music play failed:", e);
+            });
+            draw();
+        }
+        
+        // Start game on first user interaction
+        document.addEventListener('click', function startGameOnClick() {
+            startGame();
+            document.removeEventListener('click', startGameOnClick);
+        }, { once: true });
     </script>
 </body>
 </html>
