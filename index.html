@@ -137,7 +137,7 @@
         const leftArrow = document.getElementById('leftArrow');
         const rightArrow = document.getElementById('rightArrow');
 
-        // Adjusted game constants for mobile
+        // Game constants
         const PADDLE_WIDTH = 80;
         const PADDLE_HEIGHT = 15;
         const BALL_RADIUS = 10;
@@ -167,21 +167,25 @@
         let restartButton = document.getElementById('restartButton');
         let leftPressed = false;
         let rightPressed = false;
-        let brickSound = new Audio('brick_sound/break.mp3');
-        let bgMusic = new Audio('brick_sound/bg_sound.mp3');
-        bgMusic.loop = true;
-        bgMusic.volume = 0.5; // Set volume to 50%
 
-        // Brick types with border and glow
+        // Audio setup
+        const brickSound = new Audio('https://www.myinstants.com/media/sounds/brick_break.mp3'); // Example public URL
+        const paddleSound = new Audio('https://www.myinstants.com/media/sounds/paddle_hit.mp3'); // Example public URL
+        const bgMusic = new Audio('https://www.myinstants.com/media/sounds/game_background.mp3'); // Example public URL
+        bgMusic.loop = true;
+        bgMusic.volume = 0.5;
+        brickSound.volume = 0.7;
+        paddleSound.volume = 0.7;
+
+        // Brick types
         const BRICK_TYPES = {
             NORMAL: { hits: 1, color: "#FFD700", border: "#FF8C00", glow: "#FFA500" },
             MEDIUM: { hits: 2, color: "#FF6347", border: "#FF4500", glow: "#FF0000" },
             HARD: { hits: 3, color: "#8B0000", border: "#FF0000", glow: "#FF4500" }
         };
 
-        // Adjusted SIGN pattern for smaller grid
+        // Level layouts
         const LEVEL_LAYOUTS = [
-            // Level 1 - SIGN with normal bricks
             [
                 [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
                 [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1],
@@ -189,7 +193,6 @@
                 [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1],
                 [1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1]
             ],
-            // Level 2 - SIGN with medium bricks
             [
                 [2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2],
                 [2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2],
@@ -197,7 +200,6 @@
                 [0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 2],
                 [2, 2, 2, 0, 2, 2, 2, 0, 2, 0, 2]
             ],
-            // Level 3 - SIGN with hard bricks
             [
                 [3, 3, 3, 0, 3, 3, 3, 0, 3, 3, 3],
                 [3, 0, 0, 0, 0, 3, 0, 0, 3, 0, 3],
@@ -238,7 +240,7 @@
             }
         }
 
-        // Draw paddle with white outline
+        // Draw paddle
         function drawPaddle() {
             ctx.fillStyle = '#FF8C00';
             ctx.fillRect(paddleX, canvas.height - 30, PADDLE_WIDTH, PADDLE_HEIGHT);
@@ -258,7 +260,7 @@
             }
         }
 
-        // Draw bricks with border and glow effects
+        // Draw bricks
         function drawBricks() {
             for (let c = 0; c < BRICK_COLUMNS; c++) {
                 for (let r = 0; r < BRICK_ROWS; r++) {
@@ -269,26 +271,22 @@
                         brick.x = brickX;
                         brick.y = brickY;
                         const brickType = BRICK_TYPES[Object.keys(BRICK_TYPES)[brick.type - 1]];
-                        
                         ctx.shadowColor = brickType.glow;
                         ctx.shadowBlur = 10;
                         ctx.shadowOffsetX = 0;
                         ctx.shadowOffsetY = 0;
-                        
                         ctx.fillStyle = brickType.color;
                         ctx.fillRect(brickX, brickY, BRICK_WIDTH, BRICK_HEIGHT);
-                        
                         ctx.strokeStyle = brickType.border;
                         ctx.lineWidth = 2;
                         ctx.strokeRect(brickX, brickY, BRICK_WIDTH, BRICK_HEIGHT);
-                        
                         ctx.shadowBlur = 0;
                     }
                 }
             }
         }
 
-        // Collision detection for bricks
+        // Brick collision detection
         function collisionDetection() {
             for (let c = 0; c < BRICK_COLUMNS; c++) {
                 for (let r = 0; r < BRICK_ROWS; r++) {
@@ -298,7 +296,10 @@
                             ballY > b.y && ballY < b.y + BRICK_HEIGHT) {
                             ballDY = -ballDY;
                             b.hits--;
-                            if (b.hits <= 0) b.status = 0;
+                            if (b.hits <= 0) {
+                                b.status = 0;
+                                brickSound.play().catch(e => console.log("Brick sound play failed:", e));
+                            }
                             score++;
                             scoreElement.textContent = `Score: ${score}`;
                             currentHeadIndex = (currentHeadIndex + 1) % headImages.length;
@@ -332,7 +333,7 @@
             ballDY = -BALL_SPEED;
         }
 
-        // Game loop with simplified paddle collision
+        // Game loop
         function draw() {
             if (gameOver) return;
 
@@ -342,7 +343,7 @@
             drawBall();
             collisionDetection();
 
-            // Paddle movement based on button presses
+            // Paddle movement
             if (leftPressed && paddleX > 0) {
                 paddleX -= PADDLE_SPEED;
             }
@@ -359,22 +360,24 @@
             }
 
             // Paddle collision and game over check
-            const paddleBottom = canvas.height - 30 + PADDLE_HEIGHT;
+            const paddleTop = canvas.height - 30;
+            const paddleBottom = paddleTop + PADDLE_HEIGHT;
+            const ballTop = ballY + ballDY - BALL_RADIUS;
             const ballBottom = ballY + ballDY + BALL_RADIUS;
 
-            // Check if ball hits paddle
-            if (ballBottom > canvas.height - 30 && 
-                ballY + ballDY < paddleBottom && 
+            if (ballTop >= paddleTop && 
+                ballBottom <= paddleBottom && 
                 ballX > paddleX && 
                 ballX < paddleX + PADDLE_WIDTH) {
                 ballDY = -Math.abs(ballDY);
                 const hitPosition = (ballX - paddleX) / PADDLE_WIDTH;
                 ballDX = (hitPosition - 0.5) * MAX_BALL_SPEED;
+                paddleSound.play().catch(e => console.log("Paddle sound play failed:", e));
             }
-            // Check if ball passes below paddle
             else if (ballBottom > paddleBottom) {
                 gameOver = true;
                 restartButton.style.display = 'block';
+                bgMusic.pause(); // Stop background music on game over
             }
 
             ballX += ballDX;
@@ -387,6 +390,7 @@
         leftArrow.addEventListener('touchstart', (e) => {
             e.preventDefault();
             leftPressed = true;
+            if (!bgMusic.playing) bgMusic.play().catch(e => console.log("Background music play failed:", e));
         });
         leftArrow.addEventListener('touchend', (e) => {
             e.preventDefault();
@@ -395,6 +399,7 @@
         rightArrow.addEventListener('touchstart', (e) => {
             e.preventDefault();
             rightPressed = true;
+            if (!bgMusic.playing) bgMusic.play().catch(e => console.log("Background music play failed:", e));
         });
         rightArrow.addEventListener('touchend', (e) => {
             e.preventDefault();
@@ -419,14 +424,13 @@
             scoreElement.textContent = `Score: ${score}`;
             levelElement.textContent = `Level: ${currentLevel}`;
             initBricks();
+            bgMusic.play().catch(e => console.log("Background music play failed:", e));
             draw();
         });
 
         // Start game
         loadHeadImages();
         initBricks();
-        // Start background music
-        bgMusic.play().catch(e => console.log("Background music play failed:", e));
         draw();
     </script>
 </body>
